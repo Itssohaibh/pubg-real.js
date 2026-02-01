@@ -4,32 +4,98 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *'
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
     - name: Validate Configuration
       run: |
         node -e "require('./rtx-perfect.json').validate()"
+      continue-on-error: false
+      
+    - name: Generate SHA256 Hash
+      id: hash
+      run: |
+        SHA=$(sha256sum rtx-perfect.json | awk '{print $1}')
+        echo "sha256=$SHA" >> $GITHUB_OUTPUT
+        
+    - name: Cache Configuration
+      uses: actions/cache@v3
+      with:
+        path: rtx-perfect.json
+        key: rtx-perfect-${{ steps.hash.outputs.sha256 }}
+  
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
     
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
     - name: Deploy to ShadowRocket
-      if: success()
+      if: github.event_name == 'push' || github.event_name == 'pull_request'
       run: |
         curl -X POST https://api.shadowrocket.app/deploy \
           -H "Authorization: Bearer ${{ secrets.SHADOWROCKET_TOKEN }}" \
-          -F "file=@rtx-perfect.conf"
+          -F "file=@rtx-perfect.json"
+      env:
+        SHADOWROCKET_TOKEN: ${{ secrets.SHADOWROCKET_TOKEN }}
+        
+    - name: Deploy to GitHub Pages
+      if: github.event_name == 'push'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
+        
+    - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/create-release@v1
+      with:
+        tag_name: v${{ steps.hash.outputs.sha256 }}
+        release_name: RTX-PERFECT v4.0
+        body: |
+          # RTX-PERFECT v4.0 Release
           
+          ## Fixes Implemented
+          - Instant lock on first enemy
+          - Wall piercing bullets
+          - Single target locking
+          - Zero spread tracking
+          
+          ## Configuration Updates
+          - Improved tracking algorithms
+          - Enhanced stealth mode
+          - Optimized performance
+          
+          SHA: ${{ steps.hash.outputs.sha256 }}
+        draft: false
+        prerelease: false
+        
     - name: Commit Changes
       if: github.event_name == 'push'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
         git add .
-        git commit -m "Update RTX-PERFECT configuration $(date +%Y-%m-%d)"
+        git commit -m "Update RTX-PERFECT v4.0 $(date +%Y-%m-%d)"
         git push
