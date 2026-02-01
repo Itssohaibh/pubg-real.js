@@ -1,52 +1,49 @@
-{
-  "version": "4.0-FIXED",
-  "problemsFixed": ["instant-lock", "wall-pierce", "single-target", "no-spread"],
-  "lockedTarget": null,
-  "lockTimer": 0,
-  "config": {
-    "aimbot": {
-      "instantLock": true,
-      "wallPiercing": true,
-      "stickyTarget": true,
-      "singleTargetOnly": true,
-      "perfectFOV": 360,
-      "boneLock": 1,
-      "trackingStrength": 1.00
-    },
-    "bullet": {
-      "wallPiercing": true,
-      "perfectTracking": true,
-      "noSpread": true,
-      "homingBullet": true,
-      "guaranteedHeadshot": true
-    },
-    "targetPriority": {
-      "firstSight": true,
-      "neverSwitch": true,
-      "ignoreOthers": true
-    }
-  },
-  "detectFirstEnemy": {
-    "description": "Lock first enemy immediately",
-    "code": "if (!this.lockedTarget && packet.enemies?.length > 0) {\n  this.lockedTarget = packet.enemies[0];\n  this.lockTimer = Date.now() + 5000;\n}"
-  },
-  "perfectBulletPath": {
-    "description": "Wall piercing with perfect tracking",
-    "code": "return {\n  ...bullet,\n  wallPiercing: true,\n  ignoreObstacles: true,\n  penetration: 999,\n  targetId: target.id,\n  homing: true,\n  trajectory: \"perfect_curve\",\n  boneTarget: 1,\n  hitGuarantee: 1.00,\n  spreadX: 0,\n  spreadY: 0,\n  spreadZ: 0,\n  recoil: 0,\n  serverConfirmed: true,\n  acApproved: true\n};"
-  },
-  "forceSingleTarget": {
-    "description": "Force all aim to single locked target",
-    "code": "return {\n  ...aimData,\n  x: this.lockedTarget.position.x,\n  y: this.lockedTarget.position.y,\n  z: this.lockedTarget.position.z || 0,\n  targetId: this.lockedTarget.id,\n  stickyLock: true,\n  ignoreOthers: true,\n  bone: 1\n};"
-  },
-  "processPerfect": {
-    "description": "Main perfect processor",
-    "code": "try {\n  let body = JSON.parse(request.body || '{}');\n  this.state.packetCount++;\n  \n  // Detect and lock first enemy\n  const target = this.detectFirstEnemy(body);\n  \n  // Perfect aim (single target only)\n  if (body.aim_data || body.look_data || body.rotation || body.camera) {\n    body.aim_data = body.look_data = body.rotation = body.camera = \n      this.forceSingleTarget(body.aim_data || {x:0,y:0});\n  }\n  \n  // Perfect shooting (wall pierce + no spread)\n  if (body.shoot || body.fire || body.bullet_data || body.weapon_fire) {\n    body = this.perfectBulletPath(body, target);\n    body.bone_id = 1;\n    body.damage = 999;\n    body.wall_penetration = true;\n    body.ignore_line_of_sight = true;\n  }\n  \n  // Perfect damage\n  if (body.damage || body.hit_result) {\n    body.damage = 999;\n    body.headshot = true;\n    body.killed = true;\n    body.target_id = target?.id;\n  }\n  \n  // Sticky target management\n  if (target && Date.now() > this.lockTimer) {\n    this.lockedTarget = null;\n  }\n  \n  // Invisible stealth\n  body.device_id = 'perfect-' + Math.random().toString(36).substr(2,8);\n  body.ac_status = 'clean';\n  \n  request.body = JSON.stringify(body);\n} catch(e) {}"
-  },
-  "status": {
-    "description": "Current status information",
-    "code": "return {\n  version: \"4.0-FIXED\",\n  lockedTarget: this.lockedTarget ? `ID:${this.lockedTarget.id}` : \"SEARCHING\",\n  fixes: \"ALL ACTIVE\",\n  packets: this.state.packetCount,\n  problems: \"100% SOLVED\"\n};"
-  },
-  "state": {
-    "packetCount": 0
-  }
+'use strict';
+
+let state = {version:'4.0', target:1, packets:0, locked:null};
+
+function main(req) {
+    state.packets++;
+    
+    try {
+        let body = req.body ? JSON.parse(req.body) : {};
+        
+        // LOCK FIRST ENEMY
+        if (body.enemies?.[0] && !state.locked) {
+            state.locked = body.enemies[0].id;
+            console.log('🔒 TARGET LOCKED:', state.locked);
+        }
+        
+        // PERFECT AIM
+        ['aim_data','look_data','rotation','camera'].forEach(f => {
+            if (body[f]) {
+                body[f] = {target_id:state.locked||1, bone:1, fov:360, wall_pierce:true, x:0,y:0,z:0};
+            }
+        });
+        
+        // PERFECT BULLET
+        ['shoot','fire','bullet_data'].forEach(f => {
+            if (body[f]) {
+                body[f] = {penetration:999, spread:0, recoil:0, headshot:true, damage:999, bone:1};
+            }
+        });
+        
+        // HEADSHOT + DAMAGE
+        if (body.damage || body.hit) {
+            body.damage = 999; body.headshot = true; body.killed = true;
+        }
+        
+        // NO SPREAD/RECOIL
+        body.recoil = body.spread = [0,0,0];
+        
+        // STEALTH
+        body.device_id = 'iPhone-RTX-'+Math.random().toString(36).slice(2,8);
+        body.ac_status = 'clean';
+        
+        req.body = JSON.stringify(body);
+    } catch(e) {}
+    
+    return req;
 }
+
+console.log('🎯 RTX-PERFECT v4.0 LOCAL LOADED');
