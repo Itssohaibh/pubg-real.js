@@ -1,5 +1,4 @@
 {
-  "name": "RTX-PERFECT v4.0",
   "version": "4.0-FIXED",
   "problemsFixed": ["instant-lock", "wall-pierce", "single-target", "no-spread"],
   "lockedTarget": null,
