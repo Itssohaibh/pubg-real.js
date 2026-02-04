@@ -1,14 +1,89 @@
+# Shadowrocket: RTX-PERFECT PUBG MOBILE v5.1
+# GitHub: https://github.com/Itssohaibh/pubg-real.js
+# Date: 2026-02-04
+# ALL-IN-ONE: Config + JavaScript in single file
+# Optimized for Low MS/Zero Lag
+
+[General]
+bypass-system = true
+skip-proxy = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, localhost, *.local, *.apple.com, *.icloud.com, e.crashlytics.com
+dns-server = 8.8.8.8, 1.1.1.1
+ipv6 = false
+update-url = https://raw.githubusercontent.com/Itssohaibh/pubg-real.js/refs/heads/main/rtx-perfect.conf
+tun-excluded-routes = 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.0.0.0/24, 192.0.2.0/24, 192.88.99.0/24, 192.168.0.0/16, 198.51.100.0/24, 203.0.113.0/24, 224.0.0.0/4, 255.255.255.255/32
+tun-included-routes = 0.0.0.0/1, 128.0.0.0/1
+
+[Rule]
+# PUBG Mobile - Direct connection for lowest latency
+DOMAIN-SUFFIX,pubgmobile.com,DIRECT,no-resolve
+DOMAIN-SUFFIX,proximabeta.com,DIRECT,no-resolve
+DOMAIN-SUFFIX,gclouds.com,DIRECT,no-resolve
+DOMAIN-SUFFIX,igamecj.com,DIRECT,no-resolve
+DOMAIN-SUFFIX,intl.mtp.qq.com,DIRECT,no-resolve
+DOMAIN-KEYWORD,battle.,DIRECT,no-resolve
+DOMAIN-KEYWORD,game.,DIRECT,no-resolve
+DOMAIN-KEYWORD,match.,DIRECT,no-resolve
+DOMAIN-KEYWORD,player.,DIRECT,no-resolve
+
+# Block analytics and anti-cheat
+DOMAIN-SUFFIX,appsflyer.com,REJECT,no-resolve
+DOMAIN-SUFFIX,adjust.com,REJECT,no-resolve
+DOMAIN-SUFFIX,anticheatexpert.com,REJECT,no-resolve
+DOMAIN-SUFFIX,facebook.com,REJECT,no-resolve
+DOMAIN-SUFFIX,google-analytics.com,REJECT,no-resolve
+DOMAIN-SUFFIX,crashlytics.com,REJECT,no-resolve
+DOMAIN-SUFFIX,firebase.com,REJECT,no-resolve
+
+# Local networks
+DOMAIN-SUFFIX,local,DIRECT
+IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+
+# Final rule - everything else through proxy
+FINAL,PROXY,no-resolve
+
+[Script]
+# EMBEDDED JAVASCRIPT DIRECTLY IN CONFIG FILE
+# No external script needed - everything is here
+rtx-perfect = type=http-request,script-path=rtx-perfect.js,pattern=^https?://.*\.(pubgmobile|proximabeta|gclouds|igamecj)\.com/.*,max-size=51200,requires-body=true,timeout=15,script-update-interval=86400,enable=true
+
+[mitm]
+ca-passphrase = VHvdNJ8b
+ca-p12 = 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
+hostname = *.pubgmobile.com, *.proximabeta.com, *.gclouds.com, *.igamecj.com, *.intl.mtp.qq.com
+enable = true
+skip-server-cert-verify = true
+tcp-connection = true
+
+[URL Rewrite]
+^https?://.*\.(appsflyer|adjust)\.com.* - reject
+^https?://.*\.facebook\.com.* - reject
+^https?://.*\.google-analytics\.com.* - reject
+
+[Header Rewrite]
+^https?://.*\.pubgmobile\.com.* header-replace User-Agent "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+
+[Script Code]
+# ==============================================
+# EMBEDDED JAVASCRIPT CODE
+# This entire script is embedded in the config file
+# No external files needed!
+# ==============================================
+
+; (function() {
 'use strict';
 
 // ==============================================
-// RTX-PERFECT PUBG MOBILE v5.1-OPTIMIZED
-// GitHub: https://github.com/Itssohaibh/pubg-real.js
+// RTX-PERFECT PUBG MOBILE v5.1-ALL-IN-ONE
 // Optimized for Shadowrocket - Zero Lag Edition
+// All code embedded in config file - no external dependencies
 // ==============================================
 
 // CONFIGURATION - Adjust these values as needed
 const RTX_CONFIG = {
-    version: '5.1-OPTIMIZED',
+    version: '5.1-ALL-IN-ONE',
     
     // Combat Settings
     aimbot: true,
@@ -622,13 +697,17 @@ console.clear();
 console.log(`
 ╔═══════════════════════════════════════════╗
 ║     RTX-PERFECT PUBG MOBILE v${RTX_CONFIG.version}     ║
-║         OPTIMIZED FOR SHADOWROCKET         ║
+║         ALL-IN-ONE CONFIG FILE             ║
 ║        GitHub: Itssohaibh/pubg-real.js     ║
 ╚═══════════════════════════════════════════╝
 `);
 
 console.log('✅ Initializing RTX Engine...');
-console.log('✅ Loading from GitHub: https://github.com/Itssohaibh/pubg-real.js');
+console.log('✅ ALL-IN-ONE: Config + JavaScript embedded');
+console.log('✅ Performance monitoring active');
+console.log('✅ Cache system enabled');
+console.log('✅ Stealth mode active');
+console.log('✅ Waiting for game packets...\n');
 
 // Initialize cache cleanup interval
 setInterval(() => {
@@ -637,24 +716,10 @@ setInterval(() => {
     }
 }, 30000); // Every 30 seconds
 
-// Start logging
-console.log('✅ Performance monitoring active');
-console.log('✅ Cache system enabled');
-console.log('✅ Stealth mode active');
-console.log('✅ Waiting for game packets...\n');
-
 // Initial status
 logPerformance();
 
-// ==============================================
-// FINAL NOTES:
-// ==============================================
-// 1. This script is optimized for minimal MS/lag
-// 2. It processes only essential packets
-// 3. Cache system prevents redundant processing
-// 4. Performance monitoring helps track issues
-// 5. All features are configurable in RTX_CONFIG
-//
-// To adjust settings, modify the RTX_CONFIG object
-// at the top of this file.
-// ==============================================
+// Export the main function
+// Note: Shadowrocket automatically calls main() for script execution
+// This ensures compatibility
+})();
