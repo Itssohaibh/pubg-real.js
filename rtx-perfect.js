@@ -2,6 +2,7 @@
 
 // ==============================================
 // RTX-PERFECT PUBG MOBILE v5.1-OPTIMIZED
+// GitHub: https://github.com/Itssohaibh/pubg-real.js
 // Optimized for Shadowrocket - Zero Lag Edition
 // ==============================================
 
@@ -622,10 +623,12 @@ console.log(`
 ╔═══════════════════════════════════════════╗
 ║     RTX-PERFECT PUBG MOBILE v${RTX_CONFIG.version}     ║
 ║         OPTIMIZED FOR SHADOWROCKET         ║
+║        GitHub: Itssohaibh/pubg-real.js     ║
 ╚═══════════════════════════════════════════╝
 `);
 
 console.log('✅ Initializing RTX Engine...');
+console.log('✅ Loading from GitHub: https://github.com/Itssohaibh/pubg-real.js');
 
 // Initialize cache cleanup interval
 setInterval(() => {
